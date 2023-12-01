@@ -1,4 +1,5 @@
 alias r := run
+alias rp := run-python
 alias l := load
 
 compile day:
@@ -6,6 +7,9 @@ compile day:
 
 run day: (compile day)
   cd day{{day}} && ./day{{day}} < input
+
+run-python day:
+  cd day{{day}} && python day{{day}}.py < input
 
 test day: (compile day)
   cd day{{day}} && ./day{{day}} < test
