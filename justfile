@@ -1,6 +1,7 @@
 alias r := run
 alias rp := run-python
 alias l := load
+alias t := test
 
 compile day:
   ghc day{{day}}/day{{day}}.hs
