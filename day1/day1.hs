@@ -11,16 +11,11 @@ digitLine s = read [firstDigit s, firstDigit (reverse s)]
 digits = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
 
 digitLine2 :: String -> Int
-digitLine2 s = read [firstDigit2 s, lastDigit2 s]
+digitLine2 s = read [firstDigit s (zip digits ['1' .. '9']), firstDigit (reverse s) (zip (map reverse digits) ['1' .. '9'])]
   where
-    ds = zip digits ['1' .. '9']
-    firstDigit2 s = case find ((`isPrefixOf` s) . fst) ds of
+    firstDigit s ds = case find ((`isPrefixOf` s) . fst) ds of
       Just (_, n) -> n
-      Nothing -> let c = head s in if isDigit c then c else firstDigit2 (tail s)
-
-    lastDigit2 s = case find ((`isSuffixOf` s) . fst) ds of
-      Just (_, n) -> n
-      Nothing -> let c = last s in if isDigit c then c else lastDigit2 (init s)
+      Nothing -> let c = head s in if isDigit c then c else firstDigit (tail s) ds
 
 solve :: (String -> Int) -> [String] -> Int
 solve f ss = sum $ map f ss
