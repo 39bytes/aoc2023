@@ -1,15 +1,11 @@
 module Main where
 
 import Data.Char (isDigit)
+import Data.List.Split (splitOn)
 import Data.Map qualified as M
 
-splitOn :: Char -> String -> [String]
-splitOn c s = case break (== c) s of
-  (a, _ : b) -> a : splitOn c b
-  (a, "") -> [a]
-
 parseGame :: String -> [(String, Int)]
-parseGame s = map (makePair . words) $ splitOn ',' s
+parseGame s = map (makePair . words) $ splitOn "," s
   where
     makePair [n, color] = (color, read n)
 
@@ -18,7 +14,7 @@ parseSets s = (gameId, map parseGame sets)
   where
     (before, ':' : ' ' : game) = break (== ':') s
     gameId :: Int = read $ dropWhile (not . isDigit) before
-    sets = splitOn ';' game
+    sets = splitOn ";" game
 
 cubeNums :: M.Map String Int
 cubeNums = M.fromList [("red", 12), ("green", 13), ("blue", 14)]
