@@ -30,9 +30,8 @@ solve2 ss = go cardNums (replicate (length ss) 1) 0
     cardNums = map parseWinningNums ss
     go [] _ total = total
     go (x : xs) (c : counts) acc =
-      let incr = map (+ c) $ take x counts
-       in let next = drop x counts
-           in go xs (incr ++ next) (acc + c)
+      let (incr, next) = splitAt x counts
+       in go xs (map (+ c) incr ++ next) (acc + c)
 
 main :: IO ()
 main = do
