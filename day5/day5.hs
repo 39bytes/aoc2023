@@ -1,5 +1,7 @@
 module Main where
 
+import Criterion (bench, nf)
+import Criterion.Main (defaultMain)
 import Data.Char (isDigit)
 import Data.List qualified as L
 import Data.List.Split (chunksOf, splitWhen)
@@ -56,3 +58,7 @@ main = do
   let input = parseInput ls
   print $ solve1 input
   print $ solve2 input
+  defaultMain
+    [ bench "part 1: " $ nf solve1 input,
+      bench "part 2: " $ nf solve2 input
+    ]
