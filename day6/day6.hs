@@ -8,7 +8,7 @@ parse (l1 : l2 : _) = (splitLine l1, splitLine l2)
     splitLine l = let [_, right] = splitOn ":" l in words right
 
 ways :: Int -> Int -> Int
-ways time record = sum [1 | t <- [0 .. time], let totalDist = (time - t) * t, totalDist > record]
+ways time record = length $ filter (> record) $ map (\t -> t * (time - t)) [0 .. time]
 
 solve1 :: [String] -> [String] -> Int
 solve1 times dists = product $ zipWith ways ts ds
