@@ -18,3 +18,6 @@ test day: (compile day)
 load day:
   cd day{{day}} && ghci day{{day}}.hs
 
+init day:
+  ./init.sh day{{day}}
+
