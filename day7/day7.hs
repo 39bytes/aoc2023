@@ -1,11 +1,9 @@
 module Main where
 
-import Data.Function (on)
 import Data.List qualified as L
 import Data.Map qualified as M
 import Data.Maybe (fromJust)
 import Data.Ord
-import Debug.Trace (trace)
 
 parse :: [String] -> [(String, Int)]
 parse = map (\l -> let [hand, bid] = words l in (hand, read bid))
@@ -19,26 +17,25 @@ sortedCardCounts cs = L.sortBy (comparing $ Down . snd) counts
   where
     counts = map (\xs@(c : _) -> (c, length xs)) $ L.group $ L.sort cs
 
+compareOr :: (Ord a) => a -> a -> Ordering -> Ordering
+compareOr a b fallback = case compare a b of
+  EQ -> fallback
+  x -> x
+
 compareCards :: String -> String -> M.Map Char Int -> Ordering
 compareCards "" "" _ = EQ
-compareCards (c1 : cs1) (c2 : cs2) order = case compare (strength c1) (strength c2) of
-  EQ -> compareCards cs1 cs2 order
-  x -> x
+compareCards (c1 : cs1) (c2 : cs2) order = compareOr (strength c1) (strength c2) (compareCards cs1 cs2 order)
   where
     strength c = fromJust $ M.lookup c order
 
 compareHands :: String -> String -> Ordering
-compareHands a b = case compare counts1 counts2 of
-  EQ -> compareCards a b cardOrder1
-  x -> x
+compareHands a b = compareOr counts1 counts2 $ compareCards a b cardOrder1
   where
     counts1 = map snd $ sortedCardCounts a
     counts2 = map snd $ sortedCardCounts b
 
 compareHandsWithJoker :: String -> String -> Ordering
-compareHandsWithJoker a b = case compare counts1 counts2 of
-  EQ -> compareCards a b cardOrder2
-  x -> x
+compareHandsWithJoker a b = compareOr counts1 counts2 $ compareCards a b cardOrder2
   where
     popJokerCount cs = case break ((== 'J') . fst) cs of
       (_, []) -> Nothing
