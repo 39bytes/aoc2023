@@ -44,25 +44,23 @@ withinBounds grid (i, j) = 0 <= i && i <= h && 0 <= j && j <= w
 
 debug = flip trace
 
-dirs :: [Point]
-dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-
-dfs :: Grid -> Point -> Point -> Int -> Maybe Int
-dfs grid (i, j) (pi, pj) acc | grid ! i ! j == 'S' && (i /= pi || j /= pj) = Just acc
-dfs grid p@(i, j) prev acc = case moveable of
-  [] -> Nothing
-  _ -> msum $ map (\adj -> dfs grid adj p (acc + 1)) moveable
+dfs :: Grid -> Point -> Point -> [Point] -> [Point]
+dfs grid p@(i, j) (pi, pj) path | grid ! i ! j == 'S' && (i /= pi || j /= pj) = [p]
+dfs grid p@(i, j) prev path = case moveable of
+  [] -> []
+  _ -> p : rest
   where
-    neighbors = zipWith (curry $ second $ bimap (+ i) (+ j)) [North ..] dirs
-    at p = grid ! fst p ! snd p
+    neighbors = zipWith (curry $ second $ bimap (+ i) (+ j)) [North ..] [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    at (y, x) = grid ! y ! x
     canMove dir to = to /= prev && withinBounds grid to && connected (at p) (at to) dir
     moveable = map snd $ filter (uncurry canMove) neighbors
+    rest = head $ filter (not . null) $ map (\adj -> dfs grid adj p path) moveable
 
 solve1 :: Grid -> Int
-solve1 grid = loopLength `div` 2
+solve1 grid = length loop `div` 2
   where
     start = findStart grid
-    loopLength = fromJust $ dfs grid start start 0
+    loop = dfs grid start start []
 
 main :: IO ()
 main = do
