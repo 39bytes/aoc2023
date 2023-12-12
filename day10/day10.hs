@@ -42,11 +42,9 @@ withinBounds grid (i, j) = 0 <= i && i <= h && 0 <= j && j <= w
     (_, h) = bounds grid
     (_, w) = bounds $ head $ elems grid
 
-debug = flip trace
-
-dfs :: Grid -> Point -> Point -> [Point] -> [Point]
-dfs grid p@(i, j) (pi, pj) path | grid ! i ! j == 'S' && (i /= pi || j /= pj) = [p]
-dfs grid p@(i, j) prev path = case moveable of
+getLoop :: Grid -> Point -> Point -> [Point] -> [Point]
+getLoop grid p@(i, j) (pi, pj) path | grid ! i ! j == 'S' && (i /= pi || j /= pj) = [p]
+getLoop grid p@(i, j) prev path = case moveable of
   [] -> []
   _ -> p : rest
   where
@@ -54,13 +52,34 @@ dfs grid p@(i, j) prev path = case moveable of
     at (y, x) = grid ! y ! x
     canMove dir to = to /= prev && withinBounds grid to && connected (at p) (at to) dir
     moveable = map snd $ filter (uncurry canMove) neighbors
-    rest = head $ filter (not . null) $ map (\adj -> dfs grid adj p path) moveable
+    rest = head $ filter (not . null) $ map (\adj -> getLoop grid adj p path) moveable
 
 solve1 :: Grid -> Int
 solve1 grid = length loop `div` 2
   where
     start = findStart grid
-    loop = dfs grid start start []
+    loop = getLoop grid start start []
+
+getVertices :: Grid -> [Point] -> [Point]
+getVertices grid path = go path []
+  where
+    go (v@(i, j) : ps) acc | grid ! i ! j `elem` ['L', 'J', '7', 'F', 'S'] = go ps (v : acc)
+    go (_ : ps) acc = go ps acc
+    go [] acc = acc
+
+shoelace :: [Point] -> Int
+shoelace points = abs (pos - neg) `div` 2
+  where
+    pos = sum $ zipWith (*) (map snd points) (map fst (tail points))
+    neg = sum $ zipWith (*) (map fst points) (map snd (tail points))
+
+-- Pick's theorem
+solve2 :: Grid -> Int
+solve2 grid = shoelace loop - (b `div` 2) + 1
+  where
+    start = findStart grid
+    loop = getLoop grid start start []
+    b = length loop - 1
 
 main :: IO ()
 main = do
@@ -68,3 +87,4 @@ main = do
   let ls = lines inp
   let grid = parse ls
   print $ solve1 grid
+  print $ solve2 grid
